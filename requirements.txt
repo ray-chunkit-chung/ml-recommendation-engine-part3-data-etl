@@ -1,0 +1,9 @@
+tensorflow
+tensorflow-datasets
+tensorflow-io
+keras
+pandas
+python-dotenv
+kafka-python
+scikit-learn
+Jinja2
