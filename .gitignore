@@ -1,3 +1,7 @@
+# local
+kafka_2.13-3.5.1/
+kafka_2.13-3.5.1.tgz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
