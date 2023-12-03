@@ -48,9 +48,16 @@ For training and testing data
 ./kafka_2.13-3.5.1/bin/kafka-topics.sh --create --bootstrap-server 127.0.0.1:9092 --replication-factor 1 --partitions 2 --topic test
 ```
 
+Examples of writing and reading data by kafka
 
+- notebook/kafka_write_data.ipynb
+- notebook/kafka_read_batch.ipynb
+- notebook/kafka_read_stream.ipynb
+
+## load tf modeld
+
+<https://www.tensorflow.org/tutorials/keras/save_and_load>
 
 ## dynamic embeddings
 
-https://blog.tensorflow.org/2023/04/training-recommendation-model-with-dynamic-embeddings.html
-
+<https://blog.tensorflow.org/2023/04/training-recommendation-model-with-dynamic-embeddings.html>

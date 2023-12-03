@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.layers import (
@@ -10,9 +11,11 @@ from tensorflow.keras.layers import (
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-TRAIN_PATH = "../local/train.csv"
-TEST_PATH = "../local/test.csv"
-MODEL_PATH = "../local/model.h5"
+DIRNAME = os.path.dirname(__file__)
+TRAIN_PATH = os.path.join(DIRNAME, "../local/train.csv")
+TEST_PATH = os.path.join(DIRNAME, "../local/test.csv")
+MODEL_PATH = os.path.join(DIRNAME, "../local/model.h5")
+
 
 # Load the MovieLens dataset (you can replace it with your own data)
 # Assuming you have a CSV file with columns: 'user_id', 'movie_id', 'rating'
@@ -62,47 +65,3 @@ model.fit(
 # Evaluate the model
 loss = model.evaluate([test["user_id"], test["movie_id"]], test["user_rating"])
 print(f"Test Loss: {loss}")
-
-
-
-import tensorflow_io as tfio
-
-BATCH_SIZE=64
-SHUFFLE_BUFFER_SIZE=64
-NUM_COLUMNS = 2
-
-online_train_ds = tfio.experimental.streaming.KafkaBatchIODataset(
-    topics=["train"],
-    group_id="cgonline",
-    servers="127.0.0.1:9092",
-    stream_timeout=10000, # in milliseconds, to block indefinitely,set it -1
-    configuration=[
-        "session.timeout.ms=7000",
-        "max.poll.interval.ms=8000",
-        "auto.offset.reset=earliest"
-    ],
-)
-
-def decode_kafka_item(item):
-      message = tf.io.decode_csv(item.message,
-                                [[0.0] for i in range(NUM_COLUMNS)])
-      key = tf.strings.to_number(item.key)
-      return (message, key)
-
-def decode_kafka_online_item(raw_message, raw_key):
-    message = tf.io.decode_csv(raw_message, [[0.0] for i in range(NUM_COLUMNS)])
-    key = tf.strings.to_number(raw_key)
-    return (message, key)
- 
-for mini_ds in online_train_ds:
-    mini_ds = mini_ds.shuffle(buffer_size=32)
-    mini_ds = mini_ds.map(decode_kafka_online_item)
-    mini_ds = mini_ds.batch(32)
-    if len(mini_ds) > 0:
-      model.fit(mini_ds, epochs=3)
-
-train_ds = tfio.IODataset.from_kafka('cancer-train', partition=0, offset=0)
-train_ds = train_ds.shuffle(buffer_size=SHUFFLE_BUFFER_SIZE)
-train_ds = train_ds.map(decode_kafka_item)
-train_ds = train_ds.batch(BATCH_SIZE)
-
